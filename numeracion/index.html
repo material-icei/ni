@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Numeración hasta el 30</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="stage" class="stage">
+
+  <!-- PANTALLA DE INICIO -->
+  <section id="screen-intro" class="screen is-active">
+    <div class="deco deco-1" aria-hidden="true"></div>
+    <div class="deco deco-2" aria-hidden="true"></div>
+    <div class="deco deco-3" aria-hidden="true"></div>
+    <div class="deco deco-4" aria-hidden="true"></div>
+    <div class="deco deco-5" aria-hidden="true"></div>
+
+    <div class="intro-card">
+      <p class="eyebrow-emoji">🔢 🟢 ⭐ 🔺 🟣</p>
+      <h1 class="app-title">Numeración<br><span>hasta el 30</span></h1>
+      <p class="subtitle">¡Contemos, juguemos y ganemos estrellas!</p>
+      <button id="btn-start" class="btn-primary" type="button">
+        Empezar <span class="btn-arrow">▶</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- PANTALLA DE ACTIVIDAD -->
+  <section id="screen-activity" class="screen">
+    <header class="topbar">
+      <div class="activity-badge">
+        <span class="activity-icon" id="activity-icon">🔢</span>
+        <span class="activity-name" id="activity-name">Actividad</span>
+      </div>
+      <div class="progress-dots" id="progress-dots"></div>
+      <div class="stars-counter">
+        <span id="stars-count">0</span>
+        <span class="star-icon">⭐</span>
+      </div>
+    </header>
+
+    <main class="activity-main" id="activity-main">
+      <!-- contenido inyectado por script.js -->
+    </main>
+
+    <div class="feedback-banner" id="feedback-banner"></div>
+  </section>
+
+  <!-- PANTALLA FINAL -->
+  <section id="screen-final" class="screen">
+    <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
+    <div class="final-card">
+      <div class="medal" id="final-medal">🏆</div>
+      <h2 id="final-title">¡Excelente trabajo!</h2>
+      <p id="final-subtitle">Conseguiste <strong><span id="final-stars">0</span> de 30</strong> estrellas</p>
+      <div class="stars-row" id="stars-row"></div>
+      <button id="btn-restart" class="btn-primary" type="button">
+        Jugar de nuevo <span class="btn-arrow">🔄</span>
+      </button>
+    </div>
+  </section>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
