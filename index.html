@@ -131,6 +131,7 @@
     color:var(--cream);
     text-shadow:0 3px 0 rgba(43,58,85,0.25);
     letter-spacing:0.5px;
+    text-transform:uppercase;
   }
   .header p{
     font-weight:700;
@@ -138,6 +139,7 @@
     margin:0.4rem 0 0;
     color:var(--cream);
     opacity:0.92;
+    text-transform:uppercase;
   }
 
   /* -------- Mascota -------- */
@@ -155,14 +157,17 @@
 
   .speech{
     position:absolute;
-    left:16%;
-    bottom:34%;
+    left:5%;
+    bottom:50%;
+    max-width:22%;
     background:var(--cream);
     color:var(--ink);
     font-family:'Baloo 2', sans-serif;
     font-weight:700;
-    font-size:clamp(0.7rem, 1.35vw, 1rem);
-    padding:0.5em 0.9em;
+    font-size:clamp(0.7rem, 1.3vw, 0.95rem);
+    text-transform:uppercase;
+    line-height:1.25;
+    padding:0.55em 0.9em;
     border-radius:16px;
     opacity:0;
     animation:popIn 0.5s cubic-bezier(.34,1.56,.64,1) 1.7s forwards;
@@ -171,7 +176,7 @@
   .speech::after{
     content:"";
     position:absolute;
-    left:14px;
+    left:22px;
     bottom:-9px;
     border-width:10px 8px 0 0;
     border-style:solid;
@@ -250,6 +255,7 @@
     font-weight:800;
     font-size:clamp(0.95rem, 2vw, 1.5rem);
     color:var(--cream);
+    text-transform:uppercase;
   }
 
   .island-tag{
@@ -262,6 +268,7 @@
     padding:0.25em 0.9em;
     border-radius:999px;
     box-shadow:0 3px 0 var(--sun-dark);
+    text-transform:uppercase;
   }
 
   .island--soon .island-card{
@@ -289,6 +296,29 @@
     box-shadow:0 3px 0 var(--grape-dark);
   }
   .lock-badge svg{ width:52%; height:52%; }
+
+  /* -------- Camino del mapa -------- */
+  .trail{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    opacity:0;
+    animation:fadeIn 0.6s ease 1.15s forwards;
+    pointer-events:none;
+  }
+  .trail path{
+    fill:none;
+    stroke:var(--cream);
+    stroke-width:0.55;
+    stroke-linecap:round;
+    stroke-dasharray:0.3 3.6;
+    opacity:0.8;
+  }
+  .trail circle{
+    fill:var(--cream);
+    opacity:0.55;
+  }
 
   /* -------- Animaciones -------- */
   @keyframes dropIn{
@@ -388,6 +418,14 @@
       </svg>
     </div>
     <div class="speech">¡Hola! Empecemos con los números 🎉</div>
+
+    <!-- Camino del mapa del tesoro -->
+    <svg class="trail" viewBox="0 0 160 90" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M47 71 Q60 60 67 72 Q76 84 86 73 Q95 62 103 72 Q111 82 119 71"/>
+      <circle cx="47" cy="71" r="1.6"/>
+      <circle cx="86" cy="73" r="1.6"/>
+      <circle cx="119" cy="71" r="1.6"/>
+    </svg>
 
     <!-- Islas de actividades -->
     <nav class="islands" aria-label="Actividades disponibles">
