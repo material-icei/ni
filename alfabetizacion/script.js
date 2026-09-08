@@ -190,6 +190,15 @@ function renderExercise() {
   }
 }
 
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function makeWordShape(hiliteIdx) {
   const row = document.createElement('div');
   row.className = 'word-shape';
@@ -213,7 +222,7 @@ function renderLetraTemplate(content, ex) {
 
   const optsRow = document.createElement('div');
   optsRow.className = 'options-row';
-  ex.opts.forEach(o=>{
+  shuffle(ex.opts).forEach(o=>{
     const btn = document.createElement('button');
     btn.className = 'opt-emoji-btn';
     btn.textContent = o.e;
@@ -231,7 +240,7 @@ function renderRimasTemplate(content, ex) {
 
   const optsRow = document.createElement('div');
   optsRow.className = 'options-row';
-  ex.opts.forEach(o=>{
+  shuffle(ex.opts).forEach(o=>{
     const btn = document.createElement('button');
     btn.className = 'opt-emoji-btn';
     btn.textContent = o.e;
@@ -260,7 +269,7 @@ function renderChooseLetterTemplate(content, ex) {
   const correctLetter = ex.word[ex.blank];
   const optsRow = document.createElement('div');
   optsRow.className = 'options-row letters';
-  ex.opts.forEach(letter=>{
+  shuffle(ex.opts).forEach(letter=>{
     const btn = document.createElement('button');
     btn.className = 'opt-letter-btn';
     btn.textContent = letter;
@@ -273,11 +282,12 @@ function renderChooseLetterTemplate(content, ex) {
 function renderIntrusoTemplate(content, ex) {
   const row = document.createElement('div');
   row.className = 'intruso-row';
-  ex.items.forEach((item,i)=>{
+  const tagged = ex.items.map((item,i)=> ({...item, isCorrect: i===ex.c}));
+  shuffle(tagged).forEach(item=>{
     const btn = document.createElement('button');
     btn.className = 'intruso-item';
     btn.textContent = item.v;
-    btn.addEventListener('click', ()=> handleAnswer(i===ex.c, btn));
+    btn.addEventListener('click', ()=> handleAnswer(item.isCorrect, btn));
     row.appendChild(btn);
   });
   content.appendChild(row);
@@ -343,3 +353,4 @@ function launchConfetti() {
     layer.appendChild(p);
   }
 }
+
