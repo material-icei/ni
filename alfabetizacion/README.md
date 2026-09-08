@@ -1,4 +1,4 @@
-Albafetización está lista: un menú único con 6 tarjetas y 60 ejercicios en total (10 por actividad).
+Albafetización: 60 ejercicios en total (10 por actividad).
 
 Qué incluye:
 
