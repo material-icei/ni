@@ -9,4 +9,4 @@ Intruso: 4 elementos mezclando letras, números y emojis; se toca el diferente.
 Sistema de recompensa: estrella solo en el primer intento correcto, la opción errónea se apaga (no avanza), y al final medalla 🏆/🥈/🥉 con confeti.
 Estrellas y puntitos de progreso propios por actividad, escenario 16:9 sin scroll ajustado dinámicamente para Chromebook.
 
-Para agregar más letras al set de consonantes (mencionaste que querías esa posibilidad), solo hay que sumar ejercicios nuevos al array correspondiente en script.js — la estructura está pensada para eso.
+Para agregar más letras al set de consonantes, hay que sumar ejercicios nuevos al array correspondiente en script.js
