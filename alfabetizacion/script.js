@@ -34,7 +34,7 @@ const ACTIVITIES = {
       {type:'inicial', letter:'F', opts:[{e:'🦭',c:1},{e:'✋',c:0},{e:'🎲',c:0}]},
       {type:'final',   letter:'O', opts:[{e:'🎲',c:1},{e:'🍵',c:0},{e:'🐟',c:0}]},
       {type:'inicial', letter:'M', opts:[{e:'✋',c:1},{e:'🍵',c:0},{e:'🐸',c:0}]},
-      {type:'contiene',letter:'A', opts:[{e:'🍵',c:1},{e:'👆',c:0},{e:'📷',c:0}]},
+      {type:'contiene',letter:'A', opts:[{e:'👆',c:1},{e:'🍐',c:0},{e:'📷',c:0}]},
       {type:'inicial', letter:'J', opts:[{e:'🦒',c:1},{e:'🐶',c:0},{e:'🐒',c:0}]},
       {type:'final',   letter:'O', opts:[{e:'🐒',c:1},{e:'🐟',c:0},{e:'☀️',c:0}]},
     ]
