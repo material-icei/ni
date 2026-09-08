@@ -34,7 +34,7 @@ const ACTIVITIES = {
       {type:'inicial', letter:'F', opts:[{e:'🦭',c:1},{e:'✋',c:0},{e:'🎲',c:0}]},
       {type:'final',   letter:'O', opts:[{e:'🎲',c:1},{e:'🍵',c:0},{e:'🐟',c:0}]},
       {type:'inicial', letter:'M', opts:[{e:'✋',c:1},{e:'🍵',c:0},{e:'🐸',c:0}]},
-      {type:'contiene',letter:'A', opts:[{e:'👆',c:1},{e:'🍐',c:0},{e:'📷',c:0}]},
+      {type:'contiene',letter:'A', opts:[{e:'🍵',c:1},{e:'👆',c:0},{e:'📷',c:0}]},
       {type:'inicial', letter:'J', opts:[{e:'🦒',c:1},{e:'🐶',c:0},{e:'🐒',c:0}]},
       {type:'final',   letter:'O', opts:[{e:'🐒',c:1},{e:'🐟',c:0},{e:'☀️',c:0}]},
     ]
@@ -74,20 +74,24 @@ const ACTIVITIES = {
     ]
   },
 
-  /* 4) COMPLETAR VOCALES (palabras simples de 2-3 sílabas, sin grupos consonánticos) */
+  /* 4) COMPLETAR VOCALES — se completan TODAS las vocales de la palabra, una por una
+        (palabras simples de 2 y 3 sílabas, sin grupos consonánticos como bl, pr, tr, pl) */
   vocales: {
-    label:'vocales', template:'choose-letter',
+    label:'vocales', template:'choose-vowels',
     exercises:[
-      {emoji:'🦆', word:'PATO',   blank:1, opts:['A','E','I']},
-      {emoji:'🐱', word:'GATO',   blank:1, opts:['A','O','U']},
-      {emoji:'🌙', word:'LUNA',   blank:1, opts:['U','O','A']},
-      {emoji:'✋', word:'MANO',   blank:1, opts:['A','E','I']},
-      {emoji:'🎲', word:'DADO',   blank:1, opts:['A','E','U']},
-      {emoji:'🍵', word:'TAZA',   blank:1, opts:['A','I','O']},
-      {emoji:'🐸', word:'SAPO',   blank:1, opts:['A','E','U']},
-      {emoji:'🐒', word:'MONO',   blank:1, opts:['O','A','U']},
-      {emoji:'🦭', word:'FOCA',   blank:1, opts:['O','A','I']},
-      {emoji:'🦒', word:'JIRAFA', blank:1, opts:['I','A','E']},
+      {emoji:'🦆', word:'PATO'},
+      {emoji:'🐱', word:'GATO'},
+      {emoji:'🌙', word:'LUNA'},
+      {emoji:'✋', word:'MANO'},
+      {emoji:'🎲', word:'DADO'},
+      {emoji:'🍵', word:'TAZA'},
+      {emoji:'🐸', word:'SAPO'},
+      {emoji:'🐒', word:'MONO'},
+      {emoji:'🦭', word:'FOCA'},
+      {emoji:'🦒', word:'JIRAFA'},
+      {emoji:'👕', word:'CAMISA'},
+      {emoji:'🍅', word:'TOMATE'},
+      {emoji:'🐫', word:'CAMELLO'},
     ]
   },
 
@@ -128,6 +132,7 @@ const ACTIVITIES = {
 
 /* ---------- 3. ESTADO ---------- */
 let state = { key:null, index:0, stars:0, attemptFailed:false };
+let vocalesBlankPtr = 0; // vocal actual que hay que completar dentro de la palabra
 
 function initApp() {
   document.querySelectorAll('.menu-card').forEach(btn=>{
@@ -174,6 +179,7 @@ function updateProgressDots() {
 /* ---------- 4. RENDER POR PLANTILLA ---------- */
 function renderExercise() {
   state.attemptFailed = false;
+  vocalesBlankPtr = 0;
   updateProgressDots();
   const activity = ACTIVITIES[state.key];
   const ex = activity.exercises[state.index];
@@ -185,6 +191,8 @@ function renderExercise() {
     else renderRimasTemplate(content, ex);
   } else if (activity.template === 'choose-letter') {
     renderChooseLetterTemplate(content, ex);
+  } else if (activity.template === 'choose-vowels') {
+    renderVocalesTemplate(content, ex);
   } else if (activity.template === 'find-odd') {
     renderIntrusoTemplate(content, ex);
   }
@@ -279,6 +287,69 @@ function renderChooseLetterTemplate(content, ex) {
   content.appendChild(optsRow);
 }
 
+const VOWELS = ['A','E','I','O','U'];
+
+function renderVocalesTemplate(content, ex) {
+  const positions = ex.word.split('').reduce((acc,ch,i)=>{ if (VOWELS.includes(ch)) acc.push(i); return acc; }, []);
+
+  const emojiEl = document.createElement('div');
+  emojiEl.className = 'prompt-emoji';
+  emojiEl.textContent = ex.emoji;
+  content.appendChild(emojiEl);
+
+  const wordRow = document.createElement('div');
+  wordRow.className = 'word-boxes';
+  ex.word.split('').forEach((ch,i)=>{
+    const posIdx = positions.indexOf(i);
+    const isVowel = posIdx !== -1;
+    const filled = isVowel && posIdx < vocalesBlankPtr;
+    const active = isVowel && posIdx === vocalesBlankPtr;
+    const box = document.createElement('div');
+    box.className = 'letter-box' + (isVowel && !filled ? ' blank' : '') + (active ? ' active-blank' : '');
+    box.textContent = (!isVowel || filled) ? ch : '';
+    wordRow.appendChild(box);
+  });
+  content.appendChild(wordRow);
+
+  const correctVowel = ex.word[positions[vocalesBlankPtr]];
+  const distractors = shuffle(VOWELS.filter(v=>v!==correctVowel)).slice(0,2);
+  const opts = shuffle([correctVowel, ...distractors]);
+
+  const optsRow = document.createElement('div');
+  optsRow.className = 'options-row letters';
+  opts.forEach(letter=>{
+    const btn = document.createElement('button');
+    btn.className = 'opt-letter-btn';
+    btn.textContent = letter;
+    btn.addEventListener('click', ()=> handleVowelAnswer(letter===correctVowel, btn, positions.length));
+    optsRow.appendChild(btn);
+  });
+  content.appendChild(optsRow);
+}
+
+function handleVowelAnswer(isCorrect, btnEl, totalBlanks) {
+  if (isCorrect) {
+    vocalesBlankPtr++;
+    if (vocalesBlankPtr >= totalBlanks) {
+      if (!state.attemptFailed) {
+        state.stars++;
+        document.getElementById('star-count').textContent = state.stars;
+      }
+      showFeedback('🎉');
+      setTimeout(nextExercise, 900);
+    } else {
+      showFeedback('✅');
+      const content = document.getElementById('exercise-content');
+      content.innerHTML = '';
+      renderVocalesTemplate(content, ACTIVITIES[state.key].exercises[state.index]);
+    }
+  } else {
+    state.attemptFailed = true;
+    btnEl.classList.add('wrong-disabled');
+    showFeedback('🤔');
+  }
+}
+
 function renderIntrusoTemplate(content, ex) {
   const row = document.createElement('div');
   row.className = 'intruso-row';
@@ -353,4 +424,3 @@ function launchConfetti() {
     layer.appendChild(p);
   }
 }
-
