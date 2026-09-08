@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Albafetización</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="stage-wrapper">
+  <div id="stage">
+
+    <!-- ===================== MENÚ ===================== -->
+    <section id="screen-menu" class="screen visible">
+      <div class="menu-header">
+        <div class="mascot">🦉</div>
+        <h1 class="app-title">ALBAFETIZACIÓN</h1>
+      </div>
+      <div class="menu-grid">
+        <button class="menu-card card-1" data-activity="letra">
+          <span class="menu-icon">🔤🔍</span>
+          <span class="menu-badge">A</span>
+        </button>
+        <button class="menu-card card-2" data-activity="inicial">
+          <span class="menu-icon">🔤▶️</span>
+          <span class="menu-badge">_ATO</span>
+        </button>
+        <button class="menu-card card-3" data-activity="final">
+          <span class="menu-icon">▶️🔤</span>
+          <span class="menu-badge">SO_</span>
+        </button>
+        <button class="menu-card card-4" data-activity="vocales">
+          <span class="menu-icon">🎈</span>
+          <span class="menu-badge">AEIOU</span>
+        </button>
+        <button class="menu-card card-5" data-activity="rimas">
+          <span class="menu-icon">🎵</span>
+          <span class="menu-badge">🐱🦆</span>
+        </button>
+        <button class="menu-card card-6" data-activity="intruso">
+          <span class="menu-icon">🕵️</span>
+          <span class="menu-badge">?</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================== ACTIVIDAD ===================== -->
+    <section id="screen-activity" class="screen">
+      <div class="activity-topbar">
+        <button id="btn-back" class="btn-round btn-back">🏠</button>
+        <div id="progress-dots" class="progress-dots"></div>
+        <div class="star-counter">⭐<span id="star-count">0</span></div>
+      </div>
+      <div id="exercise-content" class="exercise-content"></div>
+      <div id="feedback-layer" class="feedback-layer"></div>
+    </section>
+
+    <!-- ===================== FINAL ===================== -->
+    <section id="screen-complete" class="screen">
+      <div class="complete-box">
+        <div id="medal-icon" class="medal-icon">🏆</div>
+        <div class="complete-stars">⭐ <span id="final-star-count">0</span> / <span id="final-star-total">10</span></div>
+        <div class="complete-buttons">
+          <button id="btn-retry" class="btn-round btn-big">🔁</button>
+          <button id="btn-menu" class="btn-round btn-big">🏠</button>
+        </div>
+      </div>
+      <div id="confetti-layer" class="confetti-layer"></div>
+    </section>
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
