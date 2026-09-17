@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Figuras Geométricas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage" class="stage">
+
+  <!-- ===================== MENÚ PRINCIPAL ===================== -->
+  <section id="view-menu" class="view view-menu active">
+    <div class="bg-deco">
+      <div class="cloud c1">☁️</div>
+      <div class="cloud c2">☁️</div>
+      <div class="sun-deco">☀️</div>
+    </div>
+    <header class="menu-header">
+      <div class="mascot-badge">🦉</div>
+      <h1 class="menu-title">FORMAS Y COLORES</h1>
+    </header>
+    <div id="menu-grid" class="menu-grid"></div>
+  </section>
+
+  <!-- ===================== VISTA DE ACTIVIDAD ===================== -->
+  <section id="view-activity" class="view view-activity">
+    <header class="activity-header">
+      <button id="btn-back" class="btn-back" aria-label="Volver al menú">🏠</button>
+      <div id="progress-dots" class="progress-dots"></div>
+      <div id="star-counter" class="star-counter">⭐ <span id="star-count">0</span></div>
+    </header>
+    <div id="activity-body" class="activity-body"></div>
+  </section>
+
+  <!-- ===================== PANTALLA FINAL ===================== -->
+  <section id="view-end" class="view view-end">
+    <div class="end-card">
+      <div id="end-medal" class="end-medal">🏆</div>
+      <h2 id="end-title" class="end-title">¡MUY BIEN!</h2>
+      <div id="end-stars" class="end-stars"></div>
+      <div class="end-buttons">
+        <button id="btn-retry" class="btn-big btn-retry">🔁 JUGAR DE NUEVO</button>
+        <button id="btn-menu" class="btn-big btn-menu">🏠 VOLVER AL MENÚ</button>
+      </div>
+    </div>
+    <div class="confetti-layer" id="confetti-layer"></div>
+  </section>
+
+</div>
+<script src="script.js"></script>
+</body>
+</html>
