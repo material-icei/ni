@@ -301,8 +301,9 @@ function buildExercisesAct2(){
   const shapes = ['circulo','triangulo','cuadrado','rectangulo'];
   const exercises = [];
   shapes.forEach(target=>{
-    exercises.push({target});
-    exercises.push({target});
+    const count = SCENE_HOTSPOTS.filter(h=>h.type===target).length;
+    const rounds = Math.min(2, count); // no pedir más veces que instancias disponibles
+    for(let i=0;i<rounds;i++) exercises.push({target});
   });
   return shuffle(exercises);
 }
@@ -311,10 +312,11 @@ function startActividad2(){
   showView('activity');
   let exercises = buildExercisesAct2();
   let idx=0; const done=[];
+  let foundIdxs = new Set(); // figuras ya encontradas: quedan marcadas toda la actividad
   engineSetup(exercises.length, restart);
   render();
 
-  function restart(){ exercises = buildExercisesAct2(); idx=0; done.length=0; engineSetup(exercises.length, restart); render(); }
+  function restart(){ exercises = buildExercisesAct2(); idx=0; done.length=0; foundIdxs = new Set(); engineSetup(exercises.length, restart); render(); }
 
   function render(){
     if(idx>=exercises.length){ finishActivity(restart); return; }
@@ -328,22 +330,29 @@ function startActividad2(){
       <div class="scene-wrap" id="scene" style="background-image:url('assets/escena-figuras.png');background-size:100% 100%;background-repeat:no-repeat;"></div>
     `;
     const scene = document.getElementById('scene');
-    SCENE_HOTSPOTS.forEach(h=>{
+    SCENE_HOTSPOTS.forEach((h,i)=>{
       const el = document.createElement('div');
       el.className = 'scene-item';
       el.style.left = h.left+'%'; el.style.top = h.top+'%';
       el.style.width = h.width+'%'; el.style.height = h.height+'%';
-      el.addEventListener('click', ()=>handleTap(el, h.type===target));
+      if(foundIdxs.has(i)){
+        // ya se encontró antes: queda marcada y no se puede volver a elegir
+        el.classList.add('marked-correct');
+        el.dataset.locked = '1';
+      } else {
+        el.addEventListener('click', ()=>handleTap(el, i, h.type===target));
+      }
       scene.appendChild(el);
     });
   }
 
   let attemptFailed=false;
-  function handleTap(el, isCorrect){
+  function handleTap(el, i, isCorrect){
     if(el.dataset.locked) return;
     if(isCorrect){
       el.dataset.locked = '1';
       el.classList.add('marked-correct');
+      foundIdxs.add(i);
       if(!attemptFailed) addStar();
       showFeedback(pick(PRAISE_OK), true);
       done[idx]=true; attemptFailed=false;
@@ -799,10 +808,28 @@ function startActividad9(){
       <div class="build-piece-tray" id="tray9">
         <div style="font-family:'Baloo 2';font-size:1.6vh;color:var(--card);text-align:center;">TOCÁ UNA FORMA<br>PARA AGREGARLA.<br>TOCÁ UNA PIEZA YA<br>PUESTA PARA GIRARLA<br>O CAMBIARLE EL TAMAÑO</div>
         <div id="palette9" style="display:flex;flex-wrap:wrap;gap:.8vh;justify-content:center;width:16vw;"></div>
-        <button id="clear9" class="btn-big btn-retry" style="margin-top:1vh;">🧹 LIMPIAR</button>
+        <button id="ideas9" class="btn-big btn-menu" style="margin-top:1vh;">💡 IDEAS</button>
+        <button id="clear9" class="btn-big btn-retry" style="margin-top:.6vh;">🧹 LIMPIAR</button>
+      </div>
+    </div>
+    <div class="ideas-modal-backdrop" id="ideasModal">
+      <div class="ideas-modal">
+        <button class="ideas-modal-close" id="ideasClose">✖</button>
+        <div class="ideas-modal-title">💡 IDEAS PARA INSPIRARTE</div>
+        <div class="ideas-grid">
+          <img src="assets/idea-velero.jpg" alt="Velero hecho con figuras">
+          <img src="assets/idea-gato.jpg" alt="Gato hecho con figuras">
+          <img src="assets/idea-casa.jpg" alt="Casa hecha con figuras">
+          <img src="assets/idea-cohete.jpg" alt="Cohete hecho con figuras">
+        </div>
       </div>
     </div>
   `;
+  const ideasModal = document.getElementById('ideasModal');
+  document.getElementById('ideas9').addEventListener('click', ()=> ideasModal.classList.add('show'));
+  document.getElementById('ideasClose').addEventListener('click', ()=> ideasModal.classList.remove('show'));
+  ideasModal.addEventListener('pointerdown', (e)=>{ if(e.target===ideasModal) ideasModal.classList.remove('show'); });
+
   const canvas = document.getElementById('canvas9');
   const palette = document.getElementById('palette9');
   const shapes = ['circulo','triangulo','cuadrado','rectangulo'];
