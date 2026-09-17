@@ -131,9 +131,9 @@ body{font-family:'Nunito',sans-serif;}
 
 /* ---------- scene (activity 2: find the shape) ---------- */
 .scene-wrap{position:relative;height:64vh;aspect-ratio:3/2;margin:0 auto;background:var(--card);border-radius:2vh;box-shadow:0 .6vh 0 rgba(0,0,0,.15);overflow:hidden;}
-.scene-item{position:absolute;cursor:pointer;border-radius:1vh;transition:background .12s;}
+.scene-item{position:absolute;cursor:pointer;border-radius:1vh;transition:background .3s;}
 .scene-item:active{background:rgba(255,255,255,.15);}
-.scene-item.marked-correct{outline:.6vh solid var(--green);background:rgba(76,215,135,.18);}
+.scene-item.marked-correct{background:rgba(255,253,247,.72);outline:none;}
 .scene-item.marked-wrong{outline:.5vh solid var(--coral);background:rgba(255,107,107,.22);}
 
 /* ---------- sorting activity 3 ---------- */
@@ -197,6 +197,36 @@ body{font-family:'Nunito',sans-serif;}
 .build-canvas{position:relative;width:70vw;height:72vh;background:var(--card);border-radius:2vh;box-shadow:0 .6vh 0 rgba(0,0,0,.15);}
 .build-target{position:absolute;opacity:.18;}
 .build-piece-tray{display:flex;flex-direction:column;gap:1.4vh;}
+
+/* ---------- modal de ideas/inspiración ---------- */
+.ideas-modal-backdrop{
+  position:fixed;inset:0;background:rgba(20,20,30,.55);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:5000;
+}
+.ideas-modal-backdrop.show{opacity:1;pointer-events:auto;}
+.ideas-modal{
+  position:relative;background:var(--card);border-radius:2.4vh;
+  padding:3vh 3vw;max-width:82vw;max-height:82vh;overflow:auto;
+  box-shadow:0 1vh 0 rgba(0,0,0,.2);
+}
+.ideas-modal-title{
+  font-family:'Baloo 2';font-size:2.4vh;color:var(--ink);text-align:center;
+  margin-bottom:2vh;text-transform:uppercase;
+}
+.ideas-modal-close{
+  position:absolute;top:1.2vh;right:1.2vh;width:4vh;height:4vh;border-radius:50%;
+  border:none;background:var(--coral);color:#fff;font-size:1.8vh;cursor:pointer;
+  box-shadow:0 .4vh 0 rgba(0,0,0,.2);
+}
+.ideas-modal-close:active{transform:translateY(.2vh);}
+.ideas-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:1.6vh;
+}
+.ideas-grid img{
+  width:26vw;max-width:340px;border-radius:1.4vh;
+  box-shadow:0 .4vh 0 rgba(0,0,0,.15);display:block;
+}
 .build-piece{cursor:grab;filter:drop-shadow(0 .3vh 0 rgba(0,0,0,.15));}
 .build-piece.placed{opacity:.15;pointer-events:none;}
 .build-piece.selected{outline:.4vh dashed var(--purple);border-radius:1vh;}
