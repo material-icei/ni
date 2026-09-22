@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bingo de las Letras — 1º Grado</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ESCENARIO FIJO 1366x768 (16:9), se escala completo según la ventana real -->
+<div id="stage">
+
+  <!-- PANTALLA DE SELECCIÓN -->
+  <div id="setup-screen">
+    <div class="setup-card">
+      <div class="setup-logo">🎯</div>
+      <h1>Bingo de las Letras</h1>
+      <p class="setup-subtitle">¡Elegí el número de tu tablero!</p>
+      <div class="player-grid" id="playerGrid"></div>
+      <button class="start-btn" id="startBtn" disabled>
+        ¡Jugar! 🚀
+      </button>
+    </div>
+  </div>
+
+  <!-- PANTALLA DE JUEGO -->
+  <div id="game-screen" class="hidden">
+
+    <!-- HEADER -->
+    <header class="top-bar">
+      <button class="back-btn" id="backBtn">← Volver</button>
+      <h2 id="boardTitle">Tablero 1</h2>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <!-- ÁREA DEL TABLERO — sin sidebar, ocupa todo el ancho -->
+    <div class="board-area">
+      <main class="bingo-board" id="bingoBoard" role="grid" aria-label="Tablero de bingo"></main>
+    </div>
+
+  </div>
+
+  <!-- OVERLAY + TARJETA FLOTANTE LÍNEA/BINGO -->
+  <div class="celebration-overlay hidden" id="celebrationOverlay">
+    <div class="celebration-card" id="celebrationCard">
+      <button class="celebration-close" id="celebrationClose" aria-label="Cerrar">✕</button>
+      <div class="celebration-confetti" id="celebrationConfetti"></div>
+      <div class="celebration-emoji" id="celebrationEmoji"></div>
+      <h2 class="celebration-title" id="celebrationTitle"></h2>
+      <p class="celebration-msg" id="celebrationMsg"></p>
+      <button class="celebration-btn" id="celebrationBtn">¡Seguir jugando!</button>
+    </div>
+  </div>
+
+</div>
+<!-- /#stage -->
+
+  <script src="data.js"></script>
+  <script src="game.js"></script>
+  <script>
+    // Escala el escenario completo (diseñado a 1366x768) para que siempre
+    // entre en pantalla en formato 16:9, sin scroll, sin importar la
+    // resolución real ni si la ventana está maximizada o no.
+    (function () {
+      var REF_W = 1366, REF_H = 768;
+      var stage = document.getElementById('stage');
+      function fitStage() {
+        var scale = Math.min(window.innerWidth / REF_W, window.innerHeight / REF_H);
+        stage.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+      }
+      window.addEventListener('resize', fitStage);
+      window.addEventListener('orientationchange', fitStage);
+      fitStage();
+    })();
+  </script>
+</body>
+</html>
