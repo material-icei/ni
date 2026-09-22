@@ -1,6 +1,7 @@
 Para agregar la próxima actividad:
 
-Copiar uno de los bloques <a class="island island--main">...</a> dentro de <nav class="islands-grid">, cambiar el emoji, el texto y el href. 
+Copiar uno de los bloques 
+"<a class="island island--main">...</a> dentro de <nav class="islands-grid">", cambiar el emoji, el texto y el href. 
 La grilla se reordena sola — no hay que tocar CSS ni recalcular anchos. 
 Dejé al final un bloque "Muy pronto" a modo de plantilla (con 🔒) que podés convertir en actividad activa cuando corresponda, o duplicar para mostrar más juegos bloqueados.
 
