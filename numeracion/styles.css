@@ -518,12 +518,12 @@ body{
 
 /* ================= FINAL ================= */
 #screen-final{
-  position: relative;
   overflow: hidden;
 }
 .final-card{
   position: relative;
   z-index: 2;
+  max-width: 92%;
   text-align: center;
   background: rgba(255,255,255,0.85);
   border: 4px solid var(--white);
@@ -550,7 +550,10 @@ body{
 .stars-row{
   font-size: 3.4vh;
   letter-spacing: 0.4vw;
-  margin-bottom: 2.6vh;
+  line-height: 1.3;
+  max-width: 110vh;
+  overflow-wrap: anywhere;
+  margin: 0 auto 2.6vh;
 }
 
 .confetti-layer{
@@ -575,9 +578,388 @@ body{
   100%{ transform: translateY(115vh) rotate(360deg); opacity: 0.9; }
 }
 
+/* ==========================================================
+   ARRASTRAR · COMPLETAR · UNIR
+   ========================================================== */
+
+/* Emoji en caja de tamaño fijo (el tamaño lo calcula script.js) */
+.emoji-item{
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+button.emoji-item{
+  cursor: pointer;
+  transition: transform .12s ease, opacity .12s ease, filter .12s ease;
+}
+button.emoji-item:hover{ transform: scale(1.1); }
+.emoji-item.is-counted{
+  opacity: 0.32;
+  filter: grayscale(70%);
+  transform: scale(0.82);
+}
+.emoji-item.is-counted:hover{ transform: scale(0.88); }
+
+.is-shaking{ animation: shake .35s ease; }
+
+/* Colección más compacta para dejar lugar a las fichas */
+.collection-box.compact{
+  width: 90vh;
+  height: 38vh;
+  max-height: none;
+  padding: 2vh;
+  gap: 1.4vh;
+  overflow: visible;
+}
+
+/* Fila: fichas → casillero */
+.drag-row{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3.6vh;
+}
+.drag-hint{
+  font-size: 8vh;
+  line-height: 1;
+  animation: nudge 1.2s ease-in-out infinite;
+}
+@keyframes nudge{
+  0%, 100%{ transform: translateX(0); }
+  50%{ transform: translateX(1vh); }
+}
+
+/* Fichas numéricas arrastrables */
+.tile-tray{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2.4vh;
+}
+.num-tile{
+  position: relative;
+  z-index: 1;
+  width: 17vh;
+  height: 17vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9vh;
+  font-weight: bold;
+  color: var(--ink);
+  background: var(--white);
+  border: 3px solid rgba(43,34,80,0.12);
+  border-radius: 2.8vh;
+  box-shadow: 0 0.8vh 0 rgba(43,34,80,0.18);
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.num-tile:hover{ border-color: var(--sky); }
+.num-tile.is-dragging{
+  z-index: 80;
+  cursor: grabbing;
+  border-color: var(--grape);
+  box-shadow: 0 2vh 2.4vh rgba(43,34,80,0.28);
+}
+.num-tile.is-used{
+  opacity: 0.35;
+  background: #FFEDEA;
+  border-color: var(--coral-dark);
+  cursor: default;
+}
+.num-tile.is-placed{
+  width: 100%;
+  height: 100%;
+  background: var(--leaf);
+  color: var(--white);
+  border: 0;
+  border-radius: 2.2vh;
+  box-shadow: none;
+  cursor: default;
+  animation: pop .3s ease;
+}
+
+/* Casilleros donde se sueltan las fichas */
+.drop-slot{
+  flex: 0 0 auto;
+  width: 17vh;
+  height: 17vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px dashed var(--grape);
+  border-radius: 2.6vh;
+  background: rgba(255,255,255,0.7);
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+.slot-mark{
+  font-size: 8.6vh;
+  font-weight: bold;
+  color: rgba(123,97,255,0.45);
+}
+.drop-slot.is-hover{
+  background: #EFEAFF;
+  border-color: var(--grape-dark);
+  transform: scale(1.06);
+}
+.drop-slot.is-filled{
+  border-style: solid;
+  border-color: var(--leaf-dark);
+  background: var(--leaf);
+}
+
+/* Anterior ◀ [ ] número [ ] ▶ posterior */
+.nd-row{
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3vh;
+}
+.nd-col{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4vh;
+}
+.arrow-badge.small{
+  width: 11vh;
+  height: 11vh;
+  min-width: 11vh;
+  font-size: 5.6vh;
+}
+.nd-row .drop-slot{
+  width: 21vh;
+  height: 21vh;
+}
+.nd-row .number-card-big{
+  width: 28vh;
+  height: 21vh;
+  min-width: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13vh;
+}
+.nd-row .num-tile.is-placed{ font-size: 11vh; }
+
+/* Tira numérica con huecos */
+.seq-strip{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2vh;
+}
+.strip-cell{
+  width: 21vh;
+  height: 21vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11vh;
+  font-weight: bold;
+  color: var(--white);
+  background: linear-gradient(180deg, var(--grape) 0%, var(--grape-dark) 100%);
+  border-radius: 2.6vh;
+  box-shadow: 0 0.9vh 0 var(--grape-dark);
+}
+.seq-strip .drop-slot{
+  width: 21vh;
+  height: 21vh;
+}
+.seq-strip .num-tile.is-placed{ font-size: 11vh; }
+
+/* Completar la cantidad: pila → bandeja + ✔ */
+.fill-top{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4vh;
+}
+.btn-check{
+  width: 17vh;
+  height: 17vh;
+  border: none;
+  border-radius: 50%;
+  font-family: inherit;
+  font-size: 9vh;
+  line-height: 1;
+  color: var(--white);
+  background: linear-gradient(180deg, var(--leaf) 0%, var(--leaf-dark) 100%);
+  box-shadow: 0 1vh 0 var(--leaf-dark);
+  cursor: pointer;
+  transition: transform .1s ease;
+}
+.btn-check:hover:not(:disabled){ transform: scale(1.06); }
+.btn-check:active:not(:disabled){
+  transform: translateY(0.6vh);
+  box-shadow: 0 0.3vh 0 var(--leaf-dark);
+}
+.btn-check:disabled{ opacity: 0.6; cursor: default; }
+
+.fill-panels{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2vh;
+}
+.fill-panel{
+  width: 72vh;
+  height: 42vh;
+  padding: 2vh;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 0.9vh;
+  border-radius: 2.6vh;
+  background: rgba(255,255,255,0.75);
+  border: 3px solid rgba(43,34,80,0.12);
+  transition: background .12s ease, border-color .12s ease;
+}
+.fill-panel.tray{
+  border: 4px dashed var(--turquoise);
+  background: rgba(46,196,182,0.08);
+}
+.fill-panel.is-hover{
+  background: #E6FAF7;
+  border-color: var(--turquoise-dark);
+}
+
+/* Arrastrar el número debajo de su grupo */
+.dq-row{
+  display: flex;
+  justify-content: center;
+  gap: 3vh;
+}
+.dq-col{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4vh;
+}
+.dq-panel{
+  width: 51vh;
+  height: 32vh;
+  padding: 1.6vh;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 0.8vh;
+  background: var(--white);
+  border: 3px solid rgba(43,34,80,0.12);
+  border-radius: 2.4vh;
+  box-shadow: 0 0.7vh 0 rgba(43,34,80,0.18);
+}
+
+/* Unir con líneas */
+.join-area{
+  position: relative;
+  display: grid;
+  grid-template-columns: 24vh 32vh 96vh;
+  grid-auto-rows: 23vh;
+  row-gap: 2.2vh;
+  justify-content: center;
+}
+.join-area.is-nums{
+  grid-template-columns: 30vh 50vh 30vh;
+  grid-auto-rows: 18vh;
+}
+.join-item{
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid transparent;
+  border-radius: 2.4vh;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform .12s ease, border-color .12s ease, background .12s ease, box-shadow .12s ease;
+}
+.join-item.left{ grid-column: 1; }
+.join-item.right{ grid-column: 3; }
+.join-num{
+  color: var(--white);
+  background: linear-gradient(180deg, var(--grape) 0%, var(--grape-dark) 100%);
+  box-shadow: 0 0.9vh 0 var(--grape-dark);
+}
+.join-num-text{
+  font-size: 10.5vh;
+  font-weight: bold;
+  line-height: 1;
+}
+.is-nums .join-num-text{ font-size: 10vh; }
+.join-group{
+  flex-wrap: wrap;
+  align-content: center;
+  gap: 0.6vh;
+  padding: 1.6vh;
+  background: var(--white);
+  border-color: rgba(43,34,80,0.12);
+  box-shadow: 0 0.7vh 0 rgba(43,34,80,0.18);
+}
+.join-item.is-hover{
+  transform: scale(1.04);
+  border-color: var(--sky);
+}
+.join-item.is-selected{
+  transform: scale(1.05);
+  border-color: var(--sun-dark);
+  box-shadow: 0 0 0 0.9vh rgba(255,201,60,0.55);
+}
+.join-item.is-matched{
+  cursor: default;
+  border-color: var(--pair, var(--leaf));
+}
+.join-num.is-matched{
+  background: var(--pair, var(--leaf));
+  box-shadow: 0 0.9vh 0 rgba(43,34,80,0.25);
+}
+.join-dot{
+  position: absolute;
+  top: 50%;
+  width: 3.2vh;
+  height: 3.2vh;
+  margin-top: -1.6vh;
+  border-radius: 50%;
+  background: var(--sun);
+  border: 0.5vh solid var(--white);
+  box-shadow: 0 0 0 2px rgba(43,34,80,0.25);
+}
+.join-item.left .join-dot{ right: -1.7vh; }
+.join-item.right .join-dot{ left: -1.7vh; }
+.join-item.is-matched .join-dot{ background: var(--pair, var(--leaf)); }
+.join-lines{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 5;
+}
+.join-line{
+  stroke: var(--sun-dark);
+  stroke-width: 1.1vh;
+  stroke-linecap: round;
+}
+.join-line.is-drawing{ stroke-dasharray: 1.6vh 1.6vh; }
+
 /* Respeto por preferencia de movimiento reducido */
 @media (prefers-reduced-motion: reduce){
-  .deco, .btn-primary, .option-btn, .group-panel, .medal, .confetti-piece, .sequence-slot, .sequence-tile{
+  .deco, .btn-primary, .option-btn, .group-panel, .medal, .confetti-piece, .sequence-slot, .sequence-tile,
+  .drag-hint, .is-shaking, .num-tile, .join-item, .drop-slot{
     animation: none !important;
     transition: none !important;
   }
