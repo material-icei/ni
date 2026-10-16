@@ -85,8 +85,186 @@
     return 5.4;
   }
 
+  /* ---------- Utilidades para las actividades de arrastrar, completar y unir ---------- */
+
+  // Emoji dentro de una caja de tamaño fijo (así el acomodo es predecible y nada se corta)
+  function makeEmojiItem(emoji, sizeVh, tappable) {
+    var e = el(tappable ? 'button' : 'span', 'emoji-item', emoji);
+    if (tappable) e.type = 'button';
+    e.style.width = sizeVh + 'vh';
+    e.style.height = sizeVh + 'vh';
+    e.style.fontSize = (sizeVh * 0.8) + 'vh';
+    return e;
+  }
+
+  // Tamaño más grande de emoji que entra completo en un panel de (wVh x hVh)
+  function fitEmojiSize(count, wVh, hVh, gapVh) {
+    for (var s = 12; s >= 3; s -= 0.2) {
+      var perRow = Math.floor((wVh + gapVh) / (s + gapVh));
+      if (perRow < 1) continue;
+      var rows = Math.ceil(count / perRow);
+      if (rows * (s + gapVh) - gapVh <= hVh) return Math.round(s * 10) / 10;
+    }
+    return 3;
+  }
+
+  // Un número al azar dentro de cada tramo (dificultad creciente), sin repetir
+  function pickFromBuckets(buckets) {
+    var used = [];
+    return buckets.map(function (b) {
+      var n, tries = 0;
+      do { n = rand(b[0], b[1]); tries++; } while (used.indexOf(n) !== -1 && tries < 40);
+      used.push(n);
+      return n;
+    });
+  }
+
+  // 'count' números distintos, separados al menos 'gap' entre sí
+  function pickSpaced(count, min, max, gap) {
+    for (var attempt = 0; attempt < 200; attempt++) {
+      var pool = [];
+      for (var n = min; n <= max; n++) pool.push(n);
+      pool = shuffle(pool);
+      var picks = [];
+      for (var i = 0; i < pool.length && picks.length < count; i++) {
+        var ok = true;
+        for (var j = 0; j < picks.length; j++) {
+          if (Math.abs(picks[j] - pool[i]) < gap) { ok = false; break; }
+        }
+        if (ok) picks.push(pool[i]);
+      }
+      if (picks.length === count) return picks;
+    }
+    return uniqueNumbers(count, min, max);
+  }
+
+  // Marca de error / acierto compartida por todas las actividades nuevas
+  function showRetry() {
+    state.attemptFailed = true;
+    feedbackBanner.textContent = pickRetry();
+    feedbackBanner.classList.remove('is-visible');
+    void feedbackBanner.offsetWidth;
+    feedbackBanner.classList.add('is-visible', 'is-retry');
+  }
+
+  function succeed() {
+    state.locked = true;
+    // La estrella solo se gana si se resolvió sin errores
+    if (!state.attemptFailed) {
+      state.stars++;
+      starsCount.textContent = String(state.stars);
+    }
+    feedbackBanner.classList.remove('is-retry');
+    feedbackBanner.textContent = state.attemptFailed ? pickEncouragement() : pickPraise();
+    feedbackBanner.classList.add('is-visible');
+    setTimeout(advance, 1300);
+  }
+
+  // Sacude un elemento (error)
+  function shake(node) {
+    node.classList.remove('is-shaking');
+    void node.offsetWidth;
+    node.classList.add('is-shaking');
+    setTimeout(function () { node.classList.remove('is-shaking'); }, 450);
+  }
+
+  // Busca el destino (casillero o zona) bajo el puntero, con un margen de tolerancia
+  function findTarget(x, y, targets) {
+    var pad = stage.clientHeight * 0.025;
+    var best = null, bestD = Infinity;
+    targets.forEach(function (t) {
+      if (t.classList.contains('is-filled')) return;
+      var r = t.getBoundingClientRect();
+      if (x >= r.left - pad && x <= r.right + pad && y >= r.top - pad && y <= r.bottom + pad) {
+        var d = Math.hypot(x - (r.left + r.right) / 2, y - (r.top + r.bottom) / 2);
+        if (d < bestD) { bestD = d; best = t; }
+      }
+    });
+    return best;
+  }
+
+  /* Arrastre con puntero (funciona igual con mouse, dedo o lápiz).
+     opts.getTargets()        -> destinos posibles
+     opts.onDrop(target,node) -> true si el elemento fue aceptado (el que llama lo acomoda)
+     opts.onTap(node)         -> toque corto sin arrastrar (opcional) */
+  function enableDrag(node, opts) {
+    node.style.touchAction = 'none';
+    node.addEventListener('pointerdown', function (ev) {
+      if (state.locked || node.dataset.locked === '1') return;
+      if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+      ev.preventDefault();
+      var startX = ev.clientX, startY = ev.clientY, moved = false, hover = null;
+      try { node.setPointerCapture(ev.pointerId); } catch (err) { /* ignorar */ }
+
+      function setHover(t) {
+        if (hover === t) return;
+        if (hover) hover.classList.remove('is-hover');
+        hover = t;
+        if (hover) hover.classList.add('is-hover');
+      }
+
+      function onMove(e) {
+        var dx = e.clientX - startX, dy = e.clientY - startY;
+        if (!moved && Math.abs(dx) + Math.abs(dy) > 8) {
+          moved = true;
+          node.classList.add('is-dragging');
+          node.style.transition = 'none';
+        }
+        if (moved) {
+          node.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(1.1)';
+          setHover(findTarget(e.clientX, e.clientY, opts.getTargets()));
+        }
+      }
+
+      function onUp(e) {
+        node.removeEventListener('pointermove', onMove);
+        node.removeEventListener('pointerup', onUp);
+        node.removeEventListener('pointercancel', onUp);
+        try { node.releasePointerCapture(ev.pointerId); } catch (err) { /* ignorar */ }
+        setHover(null);
+        node.classList.remove('is-dragging');
+
+        if (!moved) {
+          node.style.transform = '';
+          if (opts.onTap) opts.onTap(node);
+          return;
+        }
+        var target = e.type === 'pointercancel' ? null : findTarget(e.clientX, e.clientY, opts.getTargets());
+        var accepted = target ? opts.onDrop(target, node) : false;
+        if (!accepted) {
+          // vuelve suavemente a su lugar
+          node.style.transition = 'transform .25s ease';
+          node.style.transform = '';
+          setTimeout(function () { node.style.transition = ''; }, 280);
+        }
+      }
+
+      node.addEventListener('pointermove', onMove);
+      node.addEventListener('pointerup', onUp);
+      node.addEventListener('pointercancel', onUp);
+    });
+  }
+
+  // Coloca una ficha dentro de un casillero
+  function placeTile(tile, slot) {
+    var mark = slot.querySelector('.slot-mark');
+    if (mark) mark.remove();
+    slot.appendChild(tile);
+    tile.style.transform = '';
+    tile.style.transition = '';
+    tile.dataset.locked = '1';
+    tile.classList.add('is-placed');
+    slot.classList.add('is-filled');
+  }
+
+  function makeNumTile(value) {
+    var t = el('div', 'num-tile', String(value));
+    t.dataset.value = value;
+    return t;
+  }
+
   /* ==========================================================
-     GENERACIÓN DE EJERCICIOS — 3 actividades x 10 ejercicios
+     GENERACIÓN DE EJERCICIOS
      ========================================================== */
 
   // Actividad 1: conteo de colecciones (completar con el número)
@@ -191,6 +369,110 @@
     return true;
   }
 
+  /* ---------- Actividades nuevas: arrastrar, completar y unir (5 ejercicios c/u) ---------- */
+
+  // A) Contar y arrastrar el número al casillero
+  function buildDragCount() {
+    return pickFromBuckets([[2, 6], [5, 10], [9, 15], [14, 22], [20, 30]]).map(function (n) {
+      return {
+        type: 'countDrag',
+        answer: n,
+        emoji: COUNT_EMOJIS[rand(0, COUNT_EMOJIS.length - 1)],
+        options: distractorsNear(n, 1, 30)
+      };
+    });
+  }
+
+  // B) Completar la colección: llenar la bandeja con tantos objetos como indica el número
+  function buildFillCollection() {
+    return pickFromBuckets([[2, 5], [4, 8], [8, 12], [12, 18], [16, 24]]).map(function (n) {
+      return {
+        type: 'fill',
+        answer: n,
+        emoji: COUNT_EMOJIS[rand(0, COUNT_EMOJIS.length - 1)],
+        pileCount: Math.min(30, n + rand(2, 4))
+      };
+    });
+  }
+
+  // C) Arrastrar el anterior y el posterior a los casilleros de cada lado del número
+  function buildNeighborDrag() {
+    return shuffle(uniqueNumbers(5, 2, 29)).map(function (n) {
+      var extra = [];
+      [-3, -2, 2, 3].forEach(function (o) {
+        var v = n + o;
+        if (v >= 1 && v <= 30) extra.push(v);
+      });
+      var options = shuffle([n - 1, n + 1].concat(shuffle(extra).slice(0, 2)));
+      return { type: 'neighborDrag', base: n, options: options };
+    });
+  }
+
+  // D) Completar los números que faltan en una tira de 6 consecutivos
+  function buildSequenceFill() {
+    var blanksPerExercise = [1, 1, 2, 2, 3];
+    return blanksPerExercise.map(function (blanks) {
+      var start = rand(1, 25);
+      var values = [];
+      for (var i = 0; i < 6; i++) values.push(start + i);
+      var blankIdx = shuffle([0, 1, 2, 3, 4, 5]).slice(0, blanks);
+      var missing = blankIdx.map(function (i) { return values[i]; });
+      // una ficha de más que no sirve, para pensar
+      var spare = [];
+      for (var v = start - 2; v <= start + 7; v++) {
+        if (v >= 1 && v <= 30 && values.indexOf(v) === -1) spare.push(v);
+      }
+      var tiles = shuffle(missing.concat([spare[rand(0, spare.length - 1)]]));
+      return { type: 'seqFill', values: values, blankIdx: blankIdx, tiles: tiles };
+    });
+  }
+
+  // E) Unir cada número con el grupo que tiene esa cantidad
+  function buildJoinQuantity() {
+    var ranges = [[1, 8], [2, 12], [4, 16], [8, 22], [12, 30]];
+    return ranges.map(function (r) {
+      var nums = pickSpaced(3, r[0], r[1], 2);
+      var emoji = COUNT_EMOJIS[rand(0, COUNT_EMOJIS.length - 1)];
+      return {
+        type: 'join',
+        kind: 'quantity',
+        emoji: emoji,
+        left: nums.map(function (n) { return { key: n, value: n }; }),
+        right: shuffle(nums.map(function (n) { return { key: n, value: n }; }))
+      };
+    });
+  }
+
+  // F) Unir cada número con el que sigue (▶) o con el que va antes (◀)
+  function buildJoinNeighbor() {
+    var modes = ['posterior', 'anterior', 'posterior', 'anterior', 'posterior'];
+    return modes.map(function (mode) {
+      var bases = mode === 'posterior' ? pickSpaced(3, 1, 29, 3) : pickSpaced(3, 2, 30, 3);
+      var off = mode === 'posterior' ? 1 : -1;
+      return {
+        type: 'join',
+        kind: 'neighbor',
+        mode: mode,
+        left: bases.slice().sort(function (a, b) { return a - b; }).map(function (n) { return { key: n, value: n }; }),
+        right: shuffle(bases.map(function (n) { return { key: n, value: n + off }; }))
+      };
+    });
+  }
+
+  // G) Arrastrar cada número al grupo que tiene esa cantidad
+  function buildDragQuantity() {
+    var ranges = [[1, 8], [3, 12], [6, 16], [10, 20], [14, 30]];
+    return ranges.map(function (r) {
+      var nums = pickSpaced(3, r[0], r[1], 2);
+      return {
+        type: 'dragQty',
+        emoji: COUNT_EMOJIS[rand(0, COUNT_EMOJIS.length - 1)],
+        groups: shuffle(nums),
+        tiles: shuffle(nums)
+      };
+    });
+  }
+
   // Genera 3 opciones numéricas cercanas al valor correcto (para variar dificultad)
   function distractorsNear(correct, min, max, exclude) {
     exclude = exclude || [];
@@ -207,11 +489,19 @@
   }
 
   /* ---------- Definición de actividades ---------- */
+  // Ordenadas por tema: conteo → anterior/posterior → número y cantidad → secuencia
   var ACTIVITIES = [
     { key: 'count', icon: '🔢', name: 'Contar colecciones', build: buildActivity1, count: 10 },
+    { key: 'countDrag', icon: '👆', name: 'Contar y arrastrar el número', build: buildDragCount, count: 5 },
+    { key: 'fill', icon: '🧺', name: 'Completar la cantidad', build: buildFillCollection, count: 5 },
     { key: 'neighbor', icon: '↔️', name: 'Anterior y posterior', build: buildActivity2, count: 10 },
+    { key: 'neighborDrag', icon: '🎯', name: 'Arrastrar anterior y posterior', build: buildNeighborDrag, count: 5 },
+    { key: 'seqFill', icon: '🚂', name: 'Completar la tira numérica', build: buildSequenceFill, count: 5 },
+    { key: 'joinNeighbor', icon: '🖍️', name: 'Unir anterior y posterior', build: buildJoinNeighbor, count: 5 },
     { key: 'between', icon: '🧩', name: 'Número en el medio', build: buildActivity4, count: 10 },
     { key: 'match', icon: '🔗', name: 'Número y cantidad', build: buildActivity3, count: 10 },
+    { key: 'joinQty', icon: '🖍️', name: 'Unir número y cantidad', build: buildJoinQuantity, count: 5 },
+    { key: 'dragQty', icon: '🧲', name: 'Arrastrar número a su grupo', build: buildDragQuantity, count: 5 },
     { key: 'sequence', icon: '🪜', name: 'Ordenar números', build: buildActivity5, count: 3 }
   ];
   var TOTAL_EXERCISES = ACTIVITIES.reduce(function (sum, a) { return sum + a.count; }, 0);
@@ -369,6 +659,352 @@
       seqWrap.appendChild(tilesRow);
       activityMain.appendChild(seqWrap);
     }
+
+    if (ex.type === 'countDrag') renderCountDrag(ex);
+    if (ex.type === 'fill') renderFill(ex);
+    if (ex.type === 'neighborDrag') renderNeighborDrag(ex);
+    if (ex.type === 'seqFill') renderSeqFill(ex);
+    if (ex.type === 'join') renderJoin(ex);
+    if (ex.type === 'dragQty') renderDragQty(ex);
+  }
+
+  /* ==========================================================
+     ACTIVIDADES DE ARRASTRAR, COMPLETAR Y UNIR
+     ========================================================== */
+
+  function makeSlot(expected) {
+    var slot = el('div', 'drop-slot');
+    slot.dataset.expect = expected;
+    slot.appendChild(el('span', 'slot-mark', '?'));
+    return slot;
+  }
+
+  // Bandeja de fichas numéricas que se arrastran a los casilleros.
+  // disableWrong: la ficha equivocada queda apagada (solo si hay un único casillero).
+  function buildSlotTray(values, slots, disableWrong) {
+    var tray = el('div', 'tile-tray');
+    values.forEach(function (v) {
+      var tile = makeNumTile(v);
+      tray.appendChild(tile);
+      enableDrag(tile, {
+        getTargets: function () { return slots; },
+        onDrop: function (target, t) {
+          if (t.dataset.value * 1 !== target.dataset.expect * 1) {
+            if (disableWrong) {
+              t.classList.add('is-used');
+              t.dataset.locked = '1';
+            }
+            shake(target);
+            showRetry();
+            return false;
+          }
+          placeTile(t, target);
+          var allFilled = slots.every(function (s) { return s.classList.contains('is-filled'); });
+          if (allFilled) succeed();
+          return true;
+        }
+      });
+    });
+    return tray;
+  }
+
+  // A) Contar los objetos (se pueden ir tildando) y arrastrar el número al casillero
+  function renderCountDrag(ex) {
+    var box = el('div', 'collection-box compact');
+    var size = fitEmojiSize(ex.answer, 84, 32.5, 1.4);
+    for (var i = 0; i < ex.answer; i++) {
+      var item = makeEmojiItem(ex.emoji, size, true);
+      item.addEventListener('click', function () { this.classList.toggle('is-counted'); });
+      box.appendChild(item);
+    }
+    activityMain.appendChild(box);
+
+    var slot = makeSlot(ex.answer);
+    var row = el('div', 'drag-row');
+    row.appendChild(buildSlotTray(ex.options, [slot], true));
+    row.appendChild(el('div', 'drag-hint', '👉'));
+    row.appendChild(slot);
+    activityMain.appendChild(row);
+  }
+
+  // B) Llevar objetos de la pila a la bandeja hasta completar el número, y confirmar con ✔
+  function renderFill(ex) {
+    var top = el('div', 'fill-top');
+    top.appendChild(el('div', 'number-card-big', String(ex.answer)));
+    var check = el('button', 'btn-check', '✔');
+    check.type = 'button';
+    top.appendChild(check);
+    activityMain.appendChild(top);
+
+    var panels = el('div', 'fill-panels');
+    var pile = el('div', 'fill-panel pile');
+    var tray = el('div', 'fill-panel tray');
+    var size = fitEmojiSize(ex.pileCount, 66, 36, 0.9);
+    var zones = [pile, tray];
+
+    function moveItem(node, zone) {
+      zone.appendChild(node);
+      node.style.transform = '';
+      node.style.transition = '';
+    }
+
+    for (var i = 0; i < ex.pileCount; i++) {
+      var it = makeEmojiItem(ex.emoji, size, true);
+      pile.appendChild(it);
+      enableDrag(it, {
+        getTargets: function () { return zones; },
+        onDrop: function (zone, node) {
+          if (zone === node.parentNode) return false;
+          moveItem(node, zone);
+          return true;
+        },
+        onTap: function (node) {
+          moveItem(node, node.parentNode === pile ? tray : pile);
+        }
+      });
+    }
+
+    panels.appendChild(pile);
+    panels.appendChild(el('div', 'drag-hint', '👉'));
+    panels.appendChild(tray);
+    activityMain.appendChild(panels);
+
+    check.addEventListener('click', function () {
+      if (state.locked) return;
+      if (tray.children.length === ex.answer) {
+        check.disabled = true;
+        succeed();
+      } else {
+        shake(tray);
+        showRetry();
+      }
+    });
+  }
+
+  // C) Arrastrar el anterior (◀) y el posterior (▶) a los casilleros de cada lado del número
+  function renderNeighborDrag(ex) {
+    var slotL = makeSlot(ex.base - 1);
+    var slotR = makeSlot(ex.base + 1);
+
+    var row = el('div', 'nd-row');
+    var colL = el('div', 'nd-col');
+    colL.appendChild(el('div', 'arrow-badge small anterior', '◀'));
+    colL.appendChild(slotL);
+    var colC = el('div', 'nd-col');
+    colC.appendChild(el('div', 'number-card-big', String(ex.base)));
+    var colR = el('div', 'nd-col');
+    colR.appendChild(el('div', 'arrow-badge small posterior', '▶'));
+    colR.appendChild(slotR);
+    row.appendChild(colL);
+    row.appendChild(colC);
+    row.appendChild(colR);
+    activityMain.appendChild(row);
+
+    activityMain.appendChild(buildSlotTray(ex.options, [slotL, slotR], false));
+  }
+
+  // D) Completar los números que faltan en la tira
+  function renderSeqFill(ex) {
+    var strip = el('div', 'seq-strip');
+    var slots = [];
+    ex.values.forEach(function (v, i) {
+      if (ex.blankIdx.indexOf(i) !== -1) {
+        var slot = makeSlot(v);
+        slots.push(slot);
+        strip.appendChild(slot);
+      } else {
+        strip.appendChild(el('div', 'strip-cell', String(v)));
+      }
+    });
+    activityMain.appendChild(strip);
+    activityMain.appendChild(buildSlotTray(ex.tiles, slots, false));
+  }
+
+  // G) Arrastrar cada número debajo del grupo que tiene esa cantidad
+  function renderDragQty(ex) {
+    var row = el('div', 'dq-row');
+    var slots = [];
+    // Mismo tamaño de emoji en los tres grupos (para contar, no para comparar tamaños)
+    var size = Math.min.apply(null, ex.groups.map(function (n) {
+      return fitEmojiSize(n, 45.5, 27.5, 0.8);
+    }));
+    ex.groups.forEach(function (n) {
+      var col = el('div', 'dq-col');
+      var panel = el('div', 'dq-panel');
+      for (var i = 0; i < n; i++) {
+        var item = makeEmojiItem(ex.emoji, size, true);
+        item.addEventListener('click', function () { this.classList.toggle('is-counted'); });
+        panel.appendChild(item);
+      }
+      var slot = makeSlot(n);
+      slots.push(slot);
+      col.appendChild(panel);
+      col.appendChild(slot);
+      row.appendChild(col);
+    });
+    activityMain.appendChild(row);
+    activityMain.appendChild(buildSlotTray(ex.tiles, slots, false));
+  }
+
+  // E y F) Unir con una línea (se arrastra de un lado al otro, o se toca uno y luego el otro)
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  var PAIR_COLORS = ['var(--coral)', 'var(--grape)', 'var(--turquoise)'];
+
+  function renderJoin(ex) {
+    var isNeighbor = ex.kind === 'neighbor';
+    if (isNeighbor) {
+      activityMain.appendChild(el('div', 'arrow-badge ' + ex.mode, ex.mode === 'anterior' ? '◀' : '▶'));
+    }
+
+    var area = el('div', 'join-area' + (isNeighbor ? ' is-nums' : ''));
+    var items = [];
+
+    // Mismo tamaño de emoji en todos los grupos: así el niño cuenta y no se guía por el tamaño
+    var groupSize = isNeighbor ? 0 : Math.min.apply(null, ex.right.map(function (d) {
+      return fitEmojiSize(d.value, 90, 18.5, 0.6);
+    }));
+
+    function addItem(side, data, row) {
+      var item = el('div', 'join-item ' + side);
+      item.dataset.side = side;
+      item.dataset.key = data.key;
+      item.style.gridRow = String(row + 1);
+      if (side === 'right' && !isNeighbor) {
+        item.classList.add('join-group');
+        for (var i = 0; i < data.value; i++) item.appendChild(makeEmojiItem(ex.emoji, groupSize, false));
+      } else {
+        item.classList.add('join-num');
+        item.appendChild(el('span', 'join-num-text', String(data.value)));
+      }
+      item.appendChild(el('span', 'join-dot'));
+      area.appendChild(item);
+      items.push(item);
+    }
+
+    ex.left.forEach(function (d, i) { addItem('left', d, i); });
+    ex.right.forEach(function (d, i) { addItem('right', d, i); });
+
+    var svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('class', 'join-lines');
+    area.appendChild(svg);
+    activityMain.appendChild(area);
+
+    setupJoin(svg, items, ex.left.length);
+  }
+
+  function setupJoin(svg, items, total) {
+    var matched = 0, pairIdx = 0, selected = null;
+
+    function svgPoint(x, y) {
+      var r = svg.getBoundingClientRect();
+      return { x: x - r.left, y: y - r.top };
+    }
+    function dotPoint(item) {
+      var d = item.querySelector('.join-dot').getBoundingClientRect();
+      return svgPoint((d.left + d.right) / 2, (d.top + d.bottom) / 2);
+    }
+    function makeLine() {
+      var ln = document.createElementNS(SVG_NS, 'line');
+      ln.setAttribute('class', 'join-line');
+      svg.appendChild(ln);
+      return ln;
+    }
+    function setLine(ln, a, b) {
+      ln.setAttribute('x1', a.x); ln.setAttribute('y1', a.y);
+      ln.setAttribute('x2', b.x); ln.setAttribute('y2', b.y);
+    }
+    function candidates(item) {
+      return items.filter(function (o) {
+        return o.dataset.side !== item.dataset.side && !o.classList.contains('is-matched');
+      });
+    }
+    function clearSelection() {
+      if (selected) selected.classList.remove('is-selected');
+      selected = null;
+    }
+
+    function attempt(a, b) {
+      if (a.dataset.key !== b.dataset.key) {
+        shake(a); shake(b);
+        showRetry();
+        return;
+      }
+      var color = PAIR_COLORS[pairIdx++ % PAIR_COLORS.length];
+      var left = a.dataset.side === 'left' ? a : b;
+      var right = left === a ? b : a;
+      [a, b].forEach(function (n) {
+        n.classList.add('is-matched');
+        n.style.setProperty('--pair', color);
+      });
+      var ln = makeLine();
+      ln.classList.add('is-matched');
+      ln.style.stroke = color;
+      setLine(ln, dotPoint(left), dotPoint(right));
+      matched++;
+      if (matched === total) succeed();
+    }
+
+    function handleTap(item) {
+      if (!selected) {
+        selected = item;
+        item.classList.add('is-selected');
+      } else if (selected === item) {
+        clearSelection();
+      } else if (selected.dataset.side === item.dataset.side) {
+        clearSelection();
+        selected = item;
+        item.classList.add('is-selected');
+      } else {
+        var first = selected;
+        clearSelection();
+        attempt(first, item);
+      }
+    }
+
+    items.forEach(function (item) {
+      item.style.touchAction = 'none';
+      item.addEventListener('pointerdown', function (ev) {
+        if (state.locked || item.classList.contains('is-matched')) return;
+        if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+        ev.preventDefault();
+        try { item.setPointerCapture(ev.pointerId); } catch (err) { /* ignorar */ }
+        var p0 = dotPoint(item), sx = ev.clientX, sy = ev.clientY;
+        var moved = false, hover = null, ln = null;
+
+        function onMove(e) {
+          if (!moved && Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 8) {
+            moved = true;
+            ln = makeLine();
+            ln.classList.add('is-drawing');
+            clearSelection();
+          }
+          if (!moved) return;
+          setLine(ln, p0, svgPoint(e.clientX, e.clientY));
+          var t = findTarget(e.clientX, e.clientY, candidates(item));
+          if (hover !== t) {
+            if (hover) hover.classList.remove('is-hover');
+            hover = t;
+            if (hover) hover.classList.add('is-hover');
+          }
+        }
+
+        function onUp(e) {
+          item.removeEventListener('pointermove', onMove);
+          item.removeEventListener('pointerup', onUp);
+          item.removeEventListener('pointercancel', onUp);
+          try { item.releasePointerCapture(ev.pointerId); } catch (err) { /* ignorar */ }
+          if (hover) hover.classList.remove('is-hover');
+          if (ln) ln.remove();
+          if (!moved) { handleTap(item); return; }
+          var target = e.type === 'pointercancel' ? null : findTarget(e.clientX, e.clientY, candidates(item));
+          if (target) attempt(item, target);
+        }
+
+        item.addEventListener('pointermove', onMove);
+        item.addEventListener('pointerup', onUp);
+        item.addEventListener('pointercancel', onUp);
+      });
+    });
   }
 
   function buildOptionsGrid(options, correctAnswer) {
@@ -415,13 +1051,7 @@
       if (val === correct) node.classList.add('is-correct');
     }
 
-    state.stars++;
-    starsCount.textContent = String(state.stars);
-    feedbackBanner.classList.remove('is-retry');
-    feedbackBanner.textContent = state.attemptFailed ? pickEncouragement() : pickPraise();
-    feedbackBanner.classList.add('is-visible');
-
-    setTimeout(advance, 1300);
+    succeed();
   }
 
   function onSequenceTile(value, tileEl, ex) {
@@ -450,15 +1080,7 @@
     slot.classList.add('is-filled');
     ex.placedCount++;
 
-    if (ex.placedCount === ex.sorted.length) {
-      state.locked = true;
-      state.stars++;
-      starsCount.textContent = String(state.stars);
-      feedbackBanner.classList.remove('is-retry');
-      feedbackBanner.textContent = state.attemptFailed ? pickEncouragement() : pickPraise();
-      feedbackBanner.classList.add('is-visible');
-      setTimeout(advance, 1300);
-    }
+    if (ex.placedCount === ex.sorted.length) succeed();
   }
 
   function pickPraise() {
@@ -498,6 +1120,7 @@
 
     finalStars.textContent = String(state.stars);
     starsRow.textContent = '⭐'.repeat(Math.max(state.stars, 0));
+    starsRow.style.fontSize = state.stars > 40 ? '2.4vh' : '3.4vh';
 
     if (state.stars >= TOTAL_EXERCISES) {
       finalMedal.textContent = '🏆';
