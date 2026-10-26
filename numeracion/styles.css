@@ -3,6 +3,23 @@
    Paleta: crema cálida + coral, sol, turquesa, uva y hoja
    ========================================================== */
 
+/* ==========================================================
+   Tipografía de los números: letra escolar manuscrita (incrustada,
+   solo dígitos 0-9). Las letras siguen con la tipografía normal.
+   ========================================================== */
+@font-face{
+  font-family: 'NumerosEscolares';
+  src: url(data:font/ttf;base64,AAEAAAAKAIAAAwAgT1MvMhLTFHsAAAEoAAAATmNtYXAADACJAAABpAAAADRnbHlmgCBxrgAAAfAAAAX4aGVhZAOCMw8AAACsAAAANmhoZWEN6QLNAAAA5AAAACRobXR4MQQF9wAAAXgAAAAsbG9jYQdGCM4AAAHYAAAAGG1heHAADwBIAAABCAAAACBuYW1lAi8KGgAAB+gAAAAycG9zdAADAAAAAAgcAAAAIAABAAAAAAAA56zfj18PPPUAAggAAAAAALjpvasAAAAA5wEnYgCGAHYD/giPAAAACAABAAAAAAAAAAEAAAlj/bYAAASFAIYAhgP+AAEAAAAAAAAAAAAAAAAAAAALAAEAAAALAEcAAwAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAATfAZAABQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAILBgMFAwICAgQAAAAAAAAAAAAAAAAAAAAAAAAAAABAADAAOQlj/bb8UwljAkoAAAQAAEAEgQCHBH8A5AR8AIYEgQCKBH8AiASFAIgEhQCIBH0AiQR8AIkEhQCSAAAAAgAAAAAAAAAUAAMAAQAAABQABAAgAAAABAAEAAEAAAA5//8AAAAw////0QABAAAAAAAAAAAARQB4ANABNQFnAcsCGwJaAq8C/AACAIcAewP7CIAAFgArAAABBiMiJicmNRE0NzY3NjMyExYRERAHBgM0JyYjIgcGFREUFxYzMjc2NzY2NQNriqCf5SQSGB1fgqXwc1ZKLANUWZO1UT5BUbF1UkgbCwwBFJn6wWy1AkjFdKFtmv8Awf7y/Z3+1JNZBJjyiYy2i8n9Yc2LsllRhDpvLgABAOQAdgObCIoAHgAAJSI1ETQnIgcHAwYjIicmNTQ3ATY3NjMXFxYXERQHBgNfOA8SO4vaHCoPDx4XAZY3LSItDRIyBggTdi8Gl3gCX/D+hDEIER8bIwKuXi8fAQEEMfhUCBAZAAABAIYAdwP2CIoAOQAAJSEiNzQ3ExMSNzY1NCcmJyYmIyIGFRQHBiMiJzQ2NzY3NjYzMhcWFxYVFAcGAQYHBgcXFxQzIRYVFAPG/SdnBhmzsuRHMyZchRUdCIiOCRIjOA82MlBPLGE6Y2NWLlIpHP3vBgcDAQEBPQH6Lnc6HDABIQEjAXvTk31oPZIVBAHLyQcOFy95uTxlLBcVPzpPj656hFn8PQ0SCQILEScPLi8AAAEAigCHA/cIhQBEAAAlIicmJyYmNScnNDMyFxYfAhYXFjMyNjc2ERAhIjU0NyARECcmIyIHBgcGBhUVBiMiJxA3NjYzMhYXFhUQBxYRFAcGBgJmiGNoShogAwI6JBQIAgMED0pqgSQ/Jqz+UD0/Aa6sREeAaUIXBAMMNTUGPUrOh1uTO2ji4mg6loc3OnwqYDU+jEAeERFra3ZGXw4SUQFpAWBEOAwBVwFoUiFgPKIjVQ8qLCoBImd6c1xZoNj+zaKh/tHanVdeAAABAIgAdwP3CIoAHgAAJSInESEiNQM3NjMyFxEVFxQWFxYzFxchETYzMhcRBgPAMgb9W1kCAgM1JgcBCwoPJxQ2AgMJMy0GDHcYA5BdA+QQGhr86EAiEyALFAEBA8sdG/gnHwAAAQCIAHkD/AiKAEYAAAEiFRE2NjMyFhcWFxYVFAcGBiMiJyY1NDc2MzIVFx4CFxcWFxY7AjI2NzY1NCYnJicmIyIGBwYHBiMiJjURNDMhFhUUBwFXc0yfSpXYKTAVCHI/43OaYnEFCSkzCAMEBQIOBhM7jRolQ3Y2cggJHm5dgitXLFUmEBQaLHkC2xsbCDBs/OwdIHs/S5g2Ld66Z3VeacIODRk2HQsHBwhHIRlSQUSQ0CJJJpBKPA4PHSkQJxoDyHkFIi4FAAACAIgAdwP+CIgAJgAzAAAlBiMiJyYnJjU0NzY3ExM3NjMyFRQHATYzMhcWFxYXFhcWFhUUBwYDIgYVFBYzMjY1NCcmAuFJaFRNNFOAQyEzb1ZKGD8sB/6rqYyQbSwVBwsHBwoMilK8g+PGhYO1S1CdJigbVHvilfd8jQFGAQ7uRh0KDvvAd3kxNhctHR0yYSXHlVgDSuqdnOzpn6JvdgAAAQCJAHcD9AiKACkAAAEzMhUUBwYjIwMGIyI1NjUTIyYnNjc0NzMTNzQmJyYjIQY1NDMhMhYVBwMkjA4GDBSWxicrMgHfrgEBAQUnpJIOCQ0dUP3aJysCxFoiBgSwFwoOOvxuPigHAwOdBgYOHCwIAsJDGx4LFQZKOBMfLgAAAwCJAHcD8wiPABsAKAA2AAABFhUUAiMiADU0NzY3JicmJjU0ADMyEhUUAgcWAQYVFBIzMhI1NCYjIgMGFRQWMzI2NTQnJiMiA6JR9rC3/vNJVJ+bWiMkAQy4sfWfhYT+ElrIeHG/uX+ETmayhIO3XmFxdQOTkpbF/tEBNMCWi55ZVqBEkU3AATT+z8OT/tdeWgN7d6Si/ugBGKKh8Pt+kKCh396in4yPAAACAJIAdgPzCIoAHwA0AAAlEQYHBgYjIiYnJjU0NzYzMhcWFxYdBBEUBwYjIgEiDgIVFBYXFjMyNzY1NCcmJyYmA3xpUwVUOnSiM1JygdasYlMhFggSID3+s0BsVCwkLl+Fzl0kBhNfLXKfBKhpEwEJSVCB37aHk1BBcVV+OE1PN/rxBgsUB7E9cnZFVotDiNlXaCkvilMlJAAAAAACAB4AAwABBAkAAQAGAAAAAwABBAkAAgAOAAYAQgBvAG8AUgBlAGcAdQBsAGEAcgAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=) format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+  unicode-range: U+0030-0039;
+  size-adjust: 78%;
+  ascent-override: 144%;
+  descent-override: 0%;
+  line-gap-override: 0%;
+}
+
 :root{
   --cream:      #FFFBF1;
   --ink:        #2B2250;
@@ -19,7 +36,7 @@
   --sky:        #43B0F1;
   --white:      #FFFFFF;
   --shadow:     rgba(43, 34, 80, 0.18);
-  --font-main: 'Comic Sans MS', 'Chalkboard SE', 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  --font-main: 'NumerosEscolares', 'Comic Sans MS', 'Chalkboard SE', 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
 }
 
 *{ box-sizing: border-box; }
@@ -464,8 +481,9 @@ body{
   max-width: 94vw;
 }
 .group-panel{
-  flex: 1 1 0;
-  max-width: 32vw;
+  flex: 0 0 auto;
+  width: 40vh;
+  height: 35vh;
   display: flex;
   flex-wrap: wrap;
   align-content: center;
@@ -475,8 +493,6 @@ body{
   border: 3px solid rgba(43,34,80,0.12);
   border-radius: 2.4vh;
   padding: 1.8vh;
-  min-height: 30vh;
-  max-height: 38vh;
   overflow: hidden;
   cursor: pointer;
   box-shadow: 0 0.7vh 0 rgba(43,34,80,0.18);
@@ -955,6 +971,39 @@ button.emoji-item:hover{ transform: scale(1.1); }
   stroke-linecap: round;
 }
 .join-line.is-drawing{ stroke-dasharray: 1.6vh 1.6vh; }
+
+
+/* Trazo un poco más grueso para que los números se lean bien a distancia
+   (la letra escolar original es fina, sobre todo en blanco sobre violeta) */
+.number-card-big,
+.number-card-slot,
+.option-btn,
+.sequence-slot,
+.sequence-tile,
+.num-tile,
+.strip-cell,
+.join-num-text,
+.stars-counter,
+#final-subtitle strong,
+.app-title .num{
+  -webkit-text-stroke: 0.035em currentColor;
+  paint-order: stroke fill;
+  stroke-linejoin: round;
+}
+.number-card-big{ -webkit-text-stroke-width: 0.04em; }
+
+.question-text .num{ font-size: 1.7em; -webkit-text-stroke: 0.035em currentColor; margin: 0 0.1em; }
+
+/* Los dígitos se escalan al 78 % (la fuente es alta): se compensa donde el texto era chico */
+.stars-counter{ font-size: 3.1vh; padding: 0.4vh 1.6vw; }
+.star-icon{ font-size: 2.6vh; }
+#final-subtitle strong{ font-size: 1.45em; }
+.app-title .num{
+  font-size: 1.3em;
+  -webkit-text-stroke: 0.05em currentColor;
+  text-shadow: none;
+  filter: drop-shadow(0.3vh 0.3vh 0 #fff) drop-shadow(0.5vh 0.5vh 0 var(--shadow));
+}
 
 /* Respeto por preferencia de movimiento reducido */
 @media (prefers-reduced-motion: reduce){
