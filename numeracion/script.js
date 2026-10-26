@@ -613,12 +613,18 @@
     if (ex.type === 'match') {
       var card2 = el('div', 'number-card-big', String(ex.answer));
       activityMain.appendChild(card2);
-      activityMain.appendChild(el('p', 'question-text', ex.question));
+      var qText = el('p', 'question-text', 'Tocá el grupo que tiene ');
+      qText.appendChild(el('span', 'num', String(ex.answer)));
+      qText.appendChild(document.createTextNode(' elementos'));
+      activityMain.appendChild(qText);
       var row = el('div', 'groups-row');
+      // Mismo tamaño de figura en los tres grupos, calculado para que entren completos
+      var size = Math.min.apply(null, ex.quantities.map(function (q) {
+        return fitEmojiSize(q, 34, 28, 1);
+      }));
       ex.quantities.forEach(function (q) {
         var panel = el('div', 'group-panel');
         panel.dataset.value = q;
-        var size = sizeForCount(q);
         for (var i = 0; i < q; i++) {
           panel.appendChild(makeShapeEl(ex.shape, ex.color, size));
         }
